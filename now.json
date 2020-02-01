@@ -1,0 +1,5 @@
+{
+  "env": {
+    "DARK_SKY_KEY": "@dark-sky-key"
+  }
+}
