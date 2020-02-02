@@ -15,9 +15,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       latitude,
       longitude
     })
+    .language('en')
+    .exclude('minutely,daily')
+    .units('us')
     .get()
     res.status(200).json(forecast)
   } catch (err) {
-    console.log(err)
+    res.status(400).json({ error: err })
+    console.error(err)
   }
 }
