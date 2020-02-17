@@ -1,5 +1,6 @@
 {
   "env": {
-    "DARK_SKY_KEY": "@dark-sky-key"
+    "DARK_SKY_KEY": "@dark-sky-key",
+    "FAUNADB_SECRET": "@faunadb_secret"
   }
 }
