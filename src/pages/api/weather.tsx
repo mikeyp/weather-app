@@ -11,8 +11,7 @@ const q = faunadb.query
 const latitude = 40.1973041
 const longitude = -84.636513
 
-const refreshForecast = async () => {
-  const client = new faunadb.Client({ secret: process.env.FAUNADB_SECRET })
+const refreshForecast = async (client) => {
   const forecast = await darksky.options({
     latitude,
     longitude
@@ -46,7 +45,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     )
 
     if (timestamp < (Math.floor(Date.now() / 1000) - 179)) {
-      const newForecast = await refreshForecast()
+      const newForecast = await refreshForecast(client)
       res.status(200).json(newForecast)
     }
     else {
