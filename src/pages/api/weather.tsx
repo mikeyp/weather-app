@@ -38,22 +38,12 @@ const refreshForecast = async () => {
   return forecast
 }
 
-const getTimestamp = async (): Promise<number> => {
-  const client = new faunadb.Client({ secret: process.env.FAUNADB_SECRET })
-
-  const timestamp: number = await client.query(
-    q.Select(["data", "value"], q.Get(q.Match(q.Index("kv_key"), "timestamp")))
-  )
-
-  return timestamp
-}
-
-
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const client = new faunadb.Client({ secret: process.env.FAUNADB_SECRET })
   try {
-    const timestamp = await getTimestamp()
-
+    const timestamp: number = await client.query(
+        q.Select(["data", "value"], q.Get(q.Match(q.Index("kv_key"), "timestamp")))
+    )
 
     if (timestamp < (Math.floor(Date.now() / 1000) - 179)) {
       const newForecast = await refreshForecast()
@@ -65,7 +55,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       )
       res.status(200).json(forecast)
     }
-
 
   } catch (err) {
     res.status(400).json({ error: err })

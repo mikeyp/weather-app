@@ -1,58 +1,32 @@
 import { NextPage } from 'next'
-import fetch from 'unfetch'
+import fetch from 'node-fetch'
 import moment from 'moment'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import useSWR from 'swr'
 
-const Page: NextPage = (children) => {
-  const [loaded, setLoaded] = useState(false)
+const fetcher = url => fetch(url).then(r => r.json())
+
+const Page: NextPage = () => {
   const [updatedAt, setUpdatedAt] = useState('')
-  const [forecast, setForecast] = useState({ currently:  { time: 0, temperature: 0} })
 
-  const updateForecast = () => {
-    console.log("updating forecast")
-    fetch('/api/weather')
-      .then(r => r.json())
-      .then(data => {
-        setForecast(data)
-        setUpdatedAt(getFormattedDate(data.currently.time));
-      })
-      .then(() => setLoaded(true))
-  }
-
-  useEffect(() => {
-    updateForecast()
-    const updateInterval = setInterval(() => {
-      updateForecast()
-    }, 1000 * 60)
-  }, [])
-
-  useEffect(() => {
-    if (loaded) {
-      const interval = setInterval(() => {
-        setUpdatedAt(getFormattedDate(forecast.currently.time));
-      }, 4000)
-
-      return () => {
-        clearInterval(interval)
-      }
+  const options = {
+    refreshInterval: 25000, // 25 seconds
+    onSuccess: (data) => {
+      setUpdatedAt(moment.unix(data.currently.time).fromNow());
     }
-  }, [forecast, loaded])
-
-  const getFormattedDate = (time) => {
-    return moment.unix(time).fromNow()
   }
+
+  const { data, error } = useSWR('/api/weather', fetcher, options)
+
+  if (error) return <div>Failed to load</div>
+  if (!data) return <div>Loading data....</div>
 
   return (
     <div>
-      { loaded &&
-        <>
-          <div>Current temp: { forecast.currently.temperature }</div>
-        <div>Forecast age: { updatedAt }</div>
-        </>
-      }
+      <div>Current temp: { data.currently.temperature }</div>
+      <div>Forecast age: { updatedAt }</div>
     </div>
   )
 }
-
 
 export default Page
